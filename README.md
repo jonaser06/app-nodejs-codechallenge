@@ -80,3 +80,71 @@ You can use Graphql;
 When you finish your challenge, after forking a repository, you **must** open a pull request to our repository. There are no limitations to the implementation, you can follow the programming paradigm, modularization, and style that you feel is the most appropriate solution.
 
 If you have any questions, please let us know.
+
+# Solución
+
+## Explicación
+Para la solucion al reto se uso Nestjs, y algunas librerias para la conexion a la BD, a Kafka y el manejo de logs
+se creo 3 microservicios, es decir se creo 3 proyectos de Nestjs
+  - El primero se usa como un apigateway para los 2 restantes
+  - El segundo es un microservicio para procesar las transacciones
+  - El tercero es el microservicio de anti fraude
+
+```mermaid
+  flowchart TD
+    GATEWAY[/GATEWAY/] -->|HTTP Requests| TRANSACTION
+    TRANSACTION -->|create/read| DB_TRANSACTIONS[(Database)]
+    EVENT_BROKER{{EVENT BROKER}} <--> ANTI-FRAUD
+    TRANSACTION --> EVENT_BROKER
+    EVENT_BROKER --> TRANSACTION
+```
+
+## Ejecución local
+para levantar el proyecto basta con ejecutar cada uno de los proyectos acompañado del docker compose
+
+para la base de datos, posicionarse en el proyecto de transaction y ejecutar
+
+`npm run migrate`
+
+y luego
+
+`npm run generate`
+
+para el docker compose:
+`docker compose up`
+
+para cada microservicio:
+`npm run start:dev`
+
+## Vistas previas
+deberías verse algo como esto:
+![image](captures/captura_1.png)
+
+### Nota
+cada proyecto tiene un archivo llamado .env.example, debes renombrarlo a .env estos ya estas previamente configurados con sus variables de entorno
+
+## Pruebas
+
+#### Con monto menor a 1000
+ejecutamos un POST sobre /api/transaction
+![image](captures/captura_2.png)
+
+deberiamos ver esto en consola
+![image](captures/captura_3.png)
+
+validamos la BD
+![image](captures/captura_4.png)
+
+#### Con monto mayor a 1000
+ahora validaremos con un monto superior a 1000
+![image](captures/captura_5.png)
+
+validamos la BD
+![image](captures/captura_6.png)
+
+revisamos la consola
+![image](captures/captura_7.png)
+
+#### Consultamos una transacion
+la ultima prueba consiste en recuperar una transaccion
+![image](captures/captura_8.png)
